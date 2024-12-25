@@ -3,6 +3,7 @@ import { Asset } from "@/types/asset";
 import { fetchAssets } from "@/services/assetService";
 import { SearchInput } from "@/components/SearchInput";
 import { AssetTable } from "@/components/AssetTable";
+import { YllDisplay } from "@/components/YllDisplay";
 import { useToast } from "@/components/ui/use-toast";
 
 const REFRESH_INTERVAL = 3600000; // 1 hour in milliseconds
@@ -11,7 +12,7 @@ export default function Index() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sortColumn, setSortColumn] = useState<keyof Asset>("market_cap");
+  const [sortColumn, setSortColumn] = useState<keyof Asset>("xll_value");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const { toast } = useToast();
 
@@ -79,6 +80,8 @@ export default function Index() {
             Real-time asset prices converted to XLL (100 JPY equivalent)
           </p>
         </div>
+
+        <YllDisplay assets={assets} />
 
         <div className="w-full max-w-sm">
           <SearchInput value={search} onChange={setSearch} />
