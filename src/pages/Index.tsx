@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Asset } from "@/types/asset";
+import { Asset, AssetCategory } from "@/types/asset";
 import { fetchAssets } from "@/services/assetService";
 import { SearchInput } from "@/components/SearchInput";
 import { AssetTable } from "@/components/AssetTable";
 import { YllDisplay } from "@/components/YllDisplay";
+import { CategoryFilter } from "@/components/CategoryFilter";
 import { useToast } from "@/components/ui/use-toast";
 
 const REFRESH_INTERVAL = 3600000; // 1 hour in milliseconds
@@ -12,6 +13,7 @@ export default function Index() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<AssetCategory | "all">("all");
   const [sortColumn, setSortColumn] = useState<keyof Asset>("xll_value");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const { toast } = useToast();
@@ -48,8 +50,9 @@ export default function Index() {
   const filteredAndSortedAssets = assets
     .filter(
       (asset) =>
-        asset.name.toLowerCase().includes(search.toLowerCase()) ||
-        asset.symbol.toLowerCase().includes(search.toLowerCase())
+        (selectedCategory === "all" || asset.category === selectedCategory) &&
+        (asset.name.toLowerCase().includes(search.toLowerCase()) ||
+          asset.symbol.toLowerCase().includes(search.toLowerCase()))
     )
     .sort((a, b) => {
       const aValue = a[sortColumn];
@@ -83,8 +86,14 @@ export default function Index() {
 
         <YllDisplay assets={assets} />
 
-        <div className="w-full max-w-sm">
-          <SearchInput value={search} onChange={setSearch} />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full max-w-sm">
+            <SearchInput value={search} onChange={setSearch} />
+          </div>
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
         </div>
 
         <div className="rounded-lg border bg-card">
@@ -94,6 +103,10 @@ export default function Index() {
             sortDirection={sortDirection}
             onSort={handleSort}
           />
+        </div>
+
+        <div className="text-sm text-muted-foreground text-center">
+          Last updated: {new Date().toLocaleString()}
         </div>
       </div>
     </div>
